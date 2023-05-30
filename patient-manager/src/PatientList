@@ -1,0 +1,43 @@
+import React, { useState, useEffect } from 'react'
+import { patients } from './yjs'
+import PatientForm from './PatientForm'
+
+const PatientList = () => {
+  const [patientData, setPatientData] = useState({})
+
+  useEffect(() => {
+    const handleChanges = () => {
+      const data = {}
+      patients.forEach((value, key) => {
+        data[key] = value
+      })
+      setPatientData(data)
+    }
+
+    handleChanges() // handle initial state
+    patients.observe(handleChanges) // handle changes
+
+    // clean up observer when component unmounts
+    return () => patients.unobserve(handleChanges)
+  }, [])
+
+  const handleDelete = (key) => {
+    patients.delete(key)
+  }
+
+  return (
+    <div>
+      {Object.entries(patientData).map(([key, patient]) => (
+        <div key={key}>
+          <h2>{patient.name}</h2>
+          <p>Age: {patient.age}</p>
+          <p>Condition: {patient.condition}</p>
+          <button onClick={() => handleDelete(key)}>Delete</button>
+          <PatientForm patientKey={key} initialValues={patient} />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+export default PatientList
